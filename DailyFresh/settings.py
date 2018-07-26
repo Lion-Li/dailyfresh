@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'xewgl*(yc@4x_n&-ybcj=bg04v*vj2db%^*9op(&qlp9n+68t&'
+SECRET_KEY = 'django会自动生成'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -85,10 +85,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'daily_fresh',
-        'HOST': 'rm-bp1glfp7284eeanl71o.mysql.rds.aliyuncs.com',
-        'PORT': 3306,
-        'USR': 'lixiang',
-        'PASSWORD': '707398',
+        'HOST': '主机地址',
+        'PORT': 3306,  # 默认为3306
+        'USR': '用户名',
+        'PASSWORD': '密码',
     }
 }
 
