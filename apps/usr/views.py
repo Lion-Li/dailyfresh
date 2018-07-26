@@ -101,3 +101,6 @@ class RegisterView(View):
 
         return redirect(reverse('goods:index'))
 
+
+    #   ```````````````````
+
