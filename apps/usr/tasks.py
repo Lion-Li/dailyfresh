@@ -14,6 +14,6 @@ def send_register_email(email, username, token):
     receiver = [email]
     html_message = '<h2>尊敬的%s,天天生鲜欢迎您的到来!</h2><br>' \
                    '<h4>请点击下面链接激活您的账户,链接将在一小时后失效.</h4><br>' \
-                   '<a href="http://127.0.0.1:800/active/%s">http://127.0.0.1:800/active/%s</a>'\
+                   '<a href="http://127.0.0.1:8000/usr/active/%s">http://127.0.0.1:8000/usr/active/%s</a>'\
                    % (username, token, token)
     send_mail(subject, message, sender, receiver, html_message=html_message)
