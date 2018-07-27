@@ -15,7 +15,7 @@ import re
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from itsdangerous import SignatureExpired
 from django.conf import settings
-from django.core.mail import send_mail
+from apps.usr.tasks import send_register_email
 
 # 显示注册页面
 def register(request):
@@ -116,13 +116,12 @@ class ActiveView(View):
 
 # 用户注册
 class RegisterView(View):
+    # 显示注册页面
     def get(self, request):
-        # 显示注册页面
         return render(request, 'register.html')
 
+    # 注册处理
     def post(self, request):
-        # 注册处理
-
         # 接受数据
         username = request.POST.get('user_name')
         password = request.POST.get('pwd')
@@ -150,15 +149,11 @@ class RegisterView(View):
             usr.is_active = 0
             usr.save()
             # 发送激活链接
-            verify_email = Verify()
             info = {'confirm': usr.id}
+            verify_email = Verify()
             token = verify_email.encypt_info(info)
-            subject = '注册激活'
-            message = ''
-            sender = settings.EMAIL_FROM
-            receiver = [email]
-            html_message = '<h3>%s,天天生鲜欢迎您的到来!</h3><br><h4>点击下面链接激活您的账户.</h4><br><a href="http://127.0.0.1:800/active/%s">http://127.0.0.1:800/active/%s</a>' % (username, token, token)
-            send_mail(subject, message, sender, receiver, html_message=html_message)
+            # 发送邮件
+            send_register_email.delay(email, username, token)
         return redirect(reverse('goods:index'))
 
 
