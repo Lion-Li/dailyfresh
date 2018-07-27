@@ -1,5 +1,4 @@
 .idea
-#settings.exmple.py
 DailyFresh/settings.py
 db.sqlite3
 mysite/__pycacha__/
