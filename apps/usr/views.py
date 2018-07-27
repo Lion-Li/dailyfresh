@@ -17,6 +17,9 @@ from itsdangerous import SignatureExpired
 from django.conf import settings
 from apps.usr.tasks import send_register_email
 
+# 用户认证
+from django.contrib.auth import authenticate, login
+
 # 显示注册页面
 def register(request):
     return render(request, 'register.html')
@@ -96,6 +99,28 @@ class LoginView(View):
     def get(self, request):
         return render(request, 'login.html')
 
+    def post(self, request):
+        # 接受数据
+        username = request.POST.get('username')
+        password = request.POST.get('pwd')
+        print(username, password)
+        # 校验数据
+        if not all([username, password]):
+            return render(request, 'login.html', {'errmsg': '请输入用户名和密码'})
+
+        # 处理业务
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active == 1:
+                # 记录用户的登录状态
+                login(request, user)
+                # 返回首页
+                return redirect(reverse('goods:index'))
+            else:
+                return render(request, 'login.html', {'errmsg': '用户未激活'})
+        else:
+            return render(request, 'login.html', {'errmsg': '用户名或密码错误'})
+
 
 # 激活用户
 class ActiveView(View):
@@ -145,7 +170,7 @@ class RegisterView(View):
             return render(request, 'register.html', {'errmsg': '验证码错误'})
         else:
             # 验证码通过后再将用户信息保存到数据库
-            usr = User.objects.create_user(username, password, email)
+            usr = User.objects.create_user(username, email, password)
             usr.is_active = 0
             usr.save()
             # 发送激活链接
