@@ -1,4 +1,6 @@
 .idea
-DailyFresh.setting.py
+settings.py
+DailyFresh/settings.py
 db.sqlite3
 mysite/__pycacha__/
+venv
