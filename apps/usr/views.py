@@ -20,10 +20,6 @@ from apps.usr.tasks import send_register_email
 # 用户认证
 from django.contrib.auth import authenticate, login
 
-# 显示注册页面
-def register(request):
-    return render(request, 'register.html')
-
 
 # 验证码生成
 def verify_code(request):
@@ -93,29 +89,53 @@ class Verify(object):
         return user
 
 
-# 登录视图,路由: /usr/login
+# 用户登录
 class LoginView(View):
-    # 登录页面
+    # 路由地址: /user/login
+    # 通过继承Django内置的View(类视图),达到根据不同的请求方式调用不同的函数.
+
     def get(self, request):
-        return render(request, 'login.html')
+        # 当浏览器get请求时,返回登录页面.
+        # 如果cookie中有用户名,则使用模板时,用户名显示为记录的用户名,且'记住用户名'的复选框被选中.
+
+        if 'username' in request.COOKIES:
+            username = request.COOKIES.get('username')
+            checked = 'checked'
+        else:
+            username = ''
+            checked = ''
+
+        return render(request, 'login.html', {'username': username, 'checked': checked})
 
     def post(self, request):
-        # 接受数据
+        # 当浏览器post请求时,进行用户登录验证
+        # authenticate()为Django内置的用户认证模块,如果账户和密码正确,返回值不为空.
+        # redirect是HttpResponse的子类,有set_cookie的方法.
+
         username = request.POST.get('username')
         password = request.POST.get('pwd')
-        print(username, password)
-        # 校验数据
+        # print(username, password)
+
         if not all([username, password]):
             return render(request, 'login.html', {'errmsg': '请输入用户名和密码'})
 
-        # 处理业务
         user = authenticate(username=username, password=password)
+
         if user is not None:
+            # 如果账户已激活
             if user.is_active == 1:
+                remember = request.POST.get('remember')
+                response = redirect(reverse('goods:index'))
+
+                if remember == 'on':
+                    response.set_cookie('username', username, max_age=7*24*3600)
+                else:
+                    response.delete_cookie('username')
+
                 # 记录用户的登录状态
                 login(request, user)
-                # 返回首页
-                return redirect(reverse('goods:index'))
+
+                return response
             else:
                 return render(request, 'login.html', {'errmsg': '用户未激活'})
         else:
