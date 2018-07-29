@@ -202,4 +202,19 @@ class RegisterView(View):
         return redirect(reverse('goods:index'))
 
 
+# 用户中心-个人信息页
+def user_center_info(request):
+    return render(request, 'user_center_info.html', {'page': 'info'})
+
+
+# 用户中心-订单页
+def user_center_order(request):
+    return render(request, 'user_center_order.html', {'page': 'order'})
+
+
+# 用户中心-地址页
+def user_center_address(request):
+    return render(request, 'user_center_address.html', {'page': 'address'})
+
+
 

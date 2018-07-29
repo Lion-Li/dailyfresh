@@ -7,9 +7,9 @@
         <div class="left_menu_con clearfix">
             <h3>用户中心</h3>
             <ul>
-                <li><a href="user_center_info.html" class="active">· 个人信息</a></li>
-                <li><a href="user_center_order.html">· 全部订单</a></li>
-                <li><a href="user_center_site.html">· 收货地址</a></li>
+                <li><a href={% url 'usr:user_center_info' %} {% if page == 'info' %}class='active'{% endif %}>· 个人信息</a></li>
+                <li><a href={% url 'usr:user_center_order' %} {% if page == 'order' %}class='active'{% endif %}>· 全部订单</a></li>
+                <li><a href={% url 'usr:user_center_address' %} {% if page == 'address' %}class='active'{% endif %}>· 收货地址</a></li>
             </ul>
         </div>
         <div class="right_content clearfix">
@@ -36,7 +36,7 @@
                     </li>
 
                     <li>
-                        <a href="#"><img src="images/goods/goods004.jpg"></a>
+                        <a href="#"><img src={% static "images/goods/goods004.jpg" %}></a>
                         <h4><a href="#">吐鲁番梨光杏</a></h4>
                         <div class="operate">
                             <span class="prize">￥5.50</span>
@@ -46,7 +46,7 @@
                     </li>
 
                     <li>
-                        <a href="#"><img src="images/goods/goods005.jpg"></a>
+                        <a href="#"><img src={% static "images/goods/goods005.jpg" %}></a>
                         <h4><a href="#">黄肉桃</a></h4>
                         <div class="operate">
                             <span class="prize">￥10.00</span>
@@ -56,7 +56,7 @@
                     </li>
 
                     <li>
-                        <a href="#"><img src="images/goods/goods006.jpg"></a>
+                        <a href="#"><img src={% static "images/goods/goods006.jpg" %}></a>
                         <h4><a href="#">进口西梅</a></h4>
                         <div class="operate">
                             <span class="prize">￥28.80</span>
@@ -66,7 +66,7 @@
                     </li>
 
                     <li>
-                        <a href="#"><img src="images/goods/goods007.jpg"></a>
+                        <a href="#"><img src={% static "images/goods/goods007.jpg" %}></a>
                         <h4><a href="#">香梨</a></h4>
                         <div class="operate">
                             <span class="prize">￥6.45</span>
@@ -79,6 +79,5 @@
         </div>
     </div>
 {% endblock body %}
-
 
 

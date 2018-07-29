@@ -18,7 +18,7 @@ from django.urls import path, include
 
 urlpatterns = [
     # 配置app路由地址
-    path('cart/', include('apps.cart.urls')),
+    path('cart/', include('apps.cart.urls', namespace='cart')),
     path('goods/', include('apps.goods.urls', namespace='goods')),
     path('usr/', include('apps.usr.urls', namespace='usr')),
     path('order/', include('apps.order.urls')),
