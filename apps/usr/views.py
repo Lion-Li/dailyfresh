@@ -108,9 +108,10 @@ class LoginView(View):
         return render(request, 'login.html', {'username': username, 'checked': checked})
 
     def post(self, request):
-        # 当浏览器post请求时,进行用户登录验证
+        # 当浏览器POST请求时,进行用户登录验证
         # authenticate()为Django内置的用户认证模块,如果账户和密码正确,返回值不为空.
         # redirect是HttpResponse的子类,有set_cookie的方法.
+        # 通过GET请求获取登录后要跳转的页面,否则默认跳转到首页.
 
         username = request.POST.get('username')
         password = request.POST.get('pwd')
@@ -124,17 +125,16 @@ class LoginView(View):
         if user is not None:
             # 如果账户已激活
             if user.is_active == 1:
+                # 记录用户的登录状态
+                login(request, user)
+                next_url = request.GET.get('next', 'goods:index')
                 remember = request.POST.get('remember')
-                response = redirect(reverse('goods:index'))
+                response = redirect(next_url)
 
                 if remember == 'on':
                     response.set_cookie('username', username, max_age=7*24*3600)
                 else:
                     response.delete_cookie('username')
-
-                # 记录用户的登录状态
-                login(request, user)
-
                 return response
             else:
                 return render(request, 'login.html', {'errmsg': '用户未激活'})
