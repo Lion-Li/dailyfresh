@@ -8,7 +8,7 @@ from django.utils.six import BytesIO
 
 # 用户注册
 from django.views.generic import View
-from apps.usr.models import User
+from apps.usr.models import User, Address
 import re
 
 # 邮箱
@@ -18,7 +18,9 @@ from django.conf import settings
 from apps.usr.tasks import send_register_email
 
 # 用户认证
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from utils.mixin import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 
 # 验证码生成
@@ -110,6 +112,7 @@ class LoginView(View):
     def post(self, request):
         # 当浏览器POST请求时,进行用户登录验证
         # authenticate()为Django内置的用户认证模块,如果账户和密码正确,返回值不为空.
+        # login()会将用户的id记录在session中.
         # redirect是HttpResponse的子类,有set_cookie的方法.
         # 通过GET请求获取登录后要跳转的页面,否则默认跳转到首页.
 
@@ -125,11 +128,10 @@ class LoginView(View):
         if user is not None:
             # 如果账户已激活
             if user.is_active == 1:
-                # 记录用户的登录状态
                 login(request, user)
                 next_url = request.GET.get('next', 'goods:index')
-                remember = request.POST.get('remember')
                 response = redirect(next_url)
+                remember = request.POST.get('remember')
 
                 if remember == 'on':
                     response.set_cookie('username', username, max_age=7*24*3600)
@@ -140,6 +142,13 @@ class LoginView(View):
                 return render(request, 'login.html', {'errmsg': '用户未激活'})
         else:
             return render(request, 'login.html', {'errmsg': '用户名或密码错误'})
+
+
+# 用户注销
+class LogoutView(View):
+    def get(self, request):
+        logout(request)
+        return redirect(reverse('usr:login'))
 
 
 # 激活用户
@@ -203,18 +212,68 @@ class RegisterView(View):
 
 
 # 用户中心-个人信息页
+@login_required()
 def user_center_info(request):
+    # 当使用类视图时,可以考虑使用mixin封装as_view()
     return render(request, 'user_center_info.html', {'page': 'info'})
 
 
 # 用户中心-订单页
+@login_required()
 def user_center_order(request):
     return render(request, 'user_center_order.html', {'page': 'order'})
 
 
 # 用户中心-地址页
-def user_center_address(request):
-    return render(request, 'user_center_address.html', {'page': 'address'})
+class UserCenterAddress(LoginRequiredMixin, View):
+    def get(self, request):
+        # 显示地址信息
+
+        user = request.user
+        # try:
+        #     address = Address.objects.get(user=user, is_default=True)
+        # except Address.DoesNotExist:
+        #     address = None
+        address = Address.objects.get_default_address(user)
+
+        return render(request, 'user_center_address.html', {'page': 'address', 'address': address})
+
+    def post(self, request):
+        # 添加地址信息
+
+        receiver = request.POST.get('receiver')
+        addr = request.POST.get('addr')
+        zip_code = request.POST.get('zip_code')
+        phone_num = request.POST.get('phone_num')
+
+        if not all([receiver, addr, phone_num]):
+            return render(request, 'user_center_address.html', {'errmsg': '*为必填项'})
+
+        if not re.match(r'^1[3|4|5|7|8][0-9]{9}$', phone_num):
+            return render(request, 'user_center_address.html', {'errmsg': '手机号码格式不正确'})
+
+        # 如果已经存在默认收货地址,新添加地址不作为默认地址.
+        user = request.user
+        # try:
+        #     address = Address.objects.get(user=user, is_default=True)
+        # except Address.DoesNotExist:
+        #     address = None
+        address = Address.objects.get_default_address(user)
+
+        if address:
+            is_default = False
+        else:
+            is_default = True
+
+        Address.objects.create(user=user,
+                               receiver=receiver,
+                               addr=addr,
+                               zip_code=zip_code,
+                               phone=phone_num,
+                               is_default=is_default)
+
+        return redirect(reverse('usr:user_center_address'))  # get请求方式
+
 
 
 
