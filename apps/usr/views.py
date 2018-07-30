@@ -215,7 +215,9 @@ class RegisterView(View):
 @login_required()
 def user_center_info(request):
     # 当使用类视图时,可以考虑使用mixin封装as_view()
-    return render(request, 'user_center_info.html', {'page': 'info'})
+    user = request.user
+    address = Address.objects.get_default_address(user)
+    return render(request, 'user_center_info.html', {'page': 'info', 'address': address})
 
 
 # 用户中心-订单页
