@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.urls import reverse
+from apps.goods.models import GoodsSKU
+from django_redis import get_redis_connection
 
 # 验证码生成
 from PIL import Image, ImageDraw, ImageFont
@@ -215,9 +217,37 @@ class RegisterView(View):
 @login_required()
 def user_center_info(request):
     # 当使用类视图时,可以考虑使用mixin封装as_view()
+
+    # 获取用户的个人信息
     user = request.user
     address = Address.objects.get_default_address(user)
-    return render(request, 'user_center_info.html', {'page': 'info', 'address': address})
+
+    # # 获取用户的历史浏览记录
+    # from redis import StrictRedis
+    # StrictRedis(host='localhost', port=6379, db=3)
+
+    # 使用Django-Redis中原生客户端的用法,使用setting中设置好的redis服务器.
+    con = get_redis_connection('default')
+
+    history_key = 'history_%d' % user.id
+
+    # 获取最新浏览的五件商品
+    sku_id = con.lrange(history_key, 0, 4)
+
+    good_list = GoodsSKU.objects.filter(id__in=sku_id)
+
+    # 按照浏览顺序加入goods_res
+    goods_res = list()
+    for sku in sku_id:
+        for goods in good_list:
+            if sku == goods.id:
+                goods_res.append(goods)
+
+    context = {'page': user,
+               'address': address,
+               'goods_list': goods_res}
+
+    return render(request, 'user_center_info.html', context)
 
 
 # 用户中心-订单页
