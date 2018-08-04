@@ -11,8 +11,11 @@ class GoodsType(BaseModel):
 
     class Meta:
         db_table = 'goods_type'
+        verbose_name = '商品类型'
+        verbose_name_plural = '商品类型'
 
-
+    def __str__(self):
+        return self.name
 class GoodsSKU(BaseModel):
     # 商品SKU表
     status_choice = (
